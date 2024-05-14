@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vishwavani ePaper</title>
+    <link rel="stylesheet" href="{% static 'epaper/css/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-nice-select@1.1.0/css/nice-select.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.15/css/jquery.Jcrop.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.15/js/jquery.Jcrop.min.js"></script>
+    <link rel="stylesheet" href="{% static 'dashboard/css/fullscreen-loader.css' %}"/>
+</head>
+<body>
+<div class="loading">Loading&#8230;</div>
+<style>
+    a {
+        text-decoration: none;
+    }
+
+    a:active {
+        text-decoration: none;
+    }
+
+    a:visited {
+        text-decoration: none;
+    }
+
+    section {
+        overflow-x: hidden;
+    }
+
+    #crop-button {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        z-index: 10;
+        display: none;
+    }
+
+    .crop-btn {
+        padding: 10px 15px;
+        background: #f00;
+        color: #FFF;
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: bold;
+        border: 0;
+        z-index: 1000;
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        right: 0
+    }
+</style>
+<a href="#" class="d-none d-md-block go-previous-page">
+    <div class="fixed-circle-left">
+        <i class="fas fa-chevron-left text-white"></i>
+    </div>
+</a>
+<a href="#" class="d-none d-md-block go-next-page">
+    <div class="fixed-circle-right">
+        <i class="fas fa-chevron-right text-white"></i>
+    </div>
+</a>
+<div class="row shdw pb-1 pt-1 m-0 pl-0 pr-0">
+    <div class="col-lg-3 py-2 px-4 d-flex align-items-center justify-content-center mx-auto">
+        <img src="" class="img-fluid">
+    </div>
+    <div class="col-lg-3 py-2 px-4 d-flex align-items-center justify-content-center">
+        <a class="subscribe"><img src="{% static 'epaper/img/sub.jpg' %}" class="img-fluid"></a>
+    </div>
+    <div class="col-lg-3 py-2 d-lg-flex align-items-center justify-content-center blue edselcol">
+        <form class="forms-sample" method="post" id="form-epapers">
+            <div class="edsel d-flex">
+                <input type="text" name="date" id="datepicker" placeholder="Date" class=""> &nbsp;
+                <select class="edtn" id="select-main-edition">
+                    {% for main_edition in main_editions %}
+                        <option value="{{ main_edition.id }}">{{ main_edition.name }}</option>
+                    {% endfor %}
+                </select> &nbsp;
+                <select class="edtn" name="sub_edition" id="select-sub-edition">
+                    {% for sub_edition in sub_editions %}
+                        <option value="{{ sub_edition.id }}">{{ sub_edition.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="col-lg-3 py-2 px-4 d-flex align-items-center justify-content-end d-none d-lg-inline-flex">
+        <a class="btn btn-outline-primary"><i class="fas fa-globe-europe"></i> Website</a> &nbsp; <a
+            class="btn btn-danger subscribe"><i class="fas fa-bullhorn"></i> Subscribe</a>
+    </div>
+</div>
+<section class="secbg mainsec mx-auto pt-0 pt-md-5">
+    <div class="row">
+        <div class="col-lg-2 px-5 py-3 d-none d-lg-block" style="overflow-y: scroll;height:200vh" id="container-thumbnail-previews">
+        </div>
+        <div class="col-lg-9 newscanvas px-4 py-3 text-dark mt-3">
+            <h4 id="not-found-message">Sorry no epaper for your selection</h4>
+            <div class="row preview-items">
+                <div class="d-md-none">
+                    <h3 class="pagenum">Page <?php echo $id;?></h3> &nbsp;
+                </div>
+                <div class="col-6 d-flex justify-content-start align-items-center">
+                    <h3 class="pagenum d-none d-md-inline-flex">Page&nbsp;<span class="active-page-number"></span></h3> &nbsp;
+                    <button class="btn btn-primary btn-sm bold d-none d-lg-block download-active-pdf" style="margin-right:10px"><i
+                            class="fas fa-download"></i> PDF
+                    </button>
+                    <button class="btn btn-secondary btn-sm bold d-none d-lg-block download-active-gif" style="margin-right:10px"><i
+                            class="fas fa-download"></i> GIF
+                    </button>
+                    <button class="btn btn-success btn-sm bold cropme"><i class="fas fa-share"></i> Crop &
+                        Share
+                    </button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-end align-items-center mt-4">
+                    <button type="button" class="btn btn-warning btn-sm bold go-previous-page" style="margin-right:10px">
+                        <i class="fas fa-arrow-left d-none d-md-inline-flex"></i> PREVIOUS
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm bold go-next-page" style="margin-right:10px">
+                        <i class="fas fa-arrow-right d-none d-md-inline-flex"></i> NEXT
+                    </button>
+                </div>
+            </div>
+            <div class=" preview-items mainimg mt-3" id="crop-container">
+                <img src="#" class="img-fluid" style="width:100%" id="crop-target">
+            </div>
+            <div class="row mb-5 preview-items">
+                <div class="col-lg-6 d-flex justify-content-start align-items-center mt-4">
+                    <h3 class="pagenum d-none d-md-inline-flex">Page&nbsp;<span class="active-page-number"></span></h3> &nbsp;
+                    <a href="img/n/d.pdf" class="btn btn-primary btn-sm bold" style="margin-right:10px"><i
+                            class="fas fa-download"></i> PDF</a>
+                    <a href="{% static 'epaper/img/n' %}img/n/d.gif" class="btn btn-secondary btn-sm bold" style="margin-right:10px">
+                        <i class="fas fa-download"></i> GIF</a>
+                    <button class="btn btn-success btn-sm bold cropme"><i class="fas fa-share"></i> Crop &
+                        Share
+                    </button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-end align-items-center mt-4">
+                    <button type="button" class="btn btn-warning btn-sm bold go-previous-page" style="margin-right:10px">
+                        <i class="fas fa-arrow-left d-none d-md-inline-flex"></i> PREVIOUS
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm bold go-next-page" style="margin-right:10px">
+                        <i class="fas fa-arrow-right d-none d-md-inline-flex"></i> NEXT
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-1 py-3 d-none d-lg-block text-center">
+            Page No.
+            <div class="list-group mx-auto mt-3 bold" style="max-width: 70px;" id="container-page-numbers">
+            </div>
+        </div>
+    </div>
+</section>
+<div class="container">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-1 my-4">
+        <div class="col-md-4 d-flex align-items-center">
+            <span class="mb-3 mb-md-0 text-body-secondary">Copyright © 2024 Vishwavani All Rights Reserved.<br/>Designed & Developed by <a href="https://nichedesignz.com">TeamND</a></span>
+        </div>
+        <div class="nav col-md-4 justify-content-end d-flex">
+            <a href="/" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1">
+                <img src="{% static 'epaper/img/vlogo.png' %}" style="max-height: 40px;">
+            </a>
+        </div>
+    </footer>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="subscribe-modal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subscribeModalLabel">Subscribe ePaper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="text-center"><img src="{% static 'epaper/img/logo.png' %}" style="max-width: 120px;"></div>
+                <p class="mt-2 bold">Subscribe here to Get Our ePaper @ Your Email</p>
+                <form class="mb-3 mt-3">
+                    <label for="exampleFormControlInput1" class="form-label">Enter Your Email address</label>
+                    <input type="email" class="form-control" id="exampleFormControlInput1"
+                           placeholder="name@example.com" required>
+                    <div class="my-3">
+                        <button type="button"
+                                class="btn btn-lg btn-primary btn-block bold">Subscribe
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="share-image-modal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Crop & Share</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="text-center">
+                    <img id="image-preview" src="#" alt="" width="100%"  style="object-fit: contain; max-height: 600px"/>
+                </div>
+                <p class="mt-2 bold">Share on social media</p>
+                <div class="share-icons mt-3">
+                    <!-- WhatsApp Share Icon -->
+                    <a href="whatsapp://send?text=Check out this awesome content! https://example.com" class="share-icon whatsapp share-link" >
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <!-- Facebook Share Icon -->
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com" class="share-icon facebook"  target="_blank">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <!-- Twitter Share Icon -->
+                    <a href="https://twitter.com/intent/tweet?url=https://example.com&text=Check%20out%20this%20awesome%20content!" class="share-icon twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com" class="share-icon text-success download-button" target="_blank">
+                        <i class="fa fa-download"></i>
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com" class="share-icon text-secondary download-button" target="_blank">
+                        <i class="fa fa-copy"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const urlApiSubEditions = "{% url 'api-sub-editions'  %}"
+    const urlApiFetchPapers = "{% url 'api-find-main-edition-paper-release' %}"
+    const urlApiEPapers = "{% url 'api-epaper-home-data' %}"
+    const baseUrl = "{% url 'view_paper' %}"
+</script>
+<!-- Bootstrap Bundle with Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-nice-select@1.1.0/js/jquery.nice-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{% static 'epaper/app.js' %}"></script>
+<script src="{% static 'dashboard/js/app.js' %}"></script>
+<script src="{% static 'dashboard/js/axios.min.js' %}"></script>
+<script src="{% static 'dashboard/vendors/alert-nice-toast/nice-toast-js.min.js' %}"></script>
+</body>
+</html>

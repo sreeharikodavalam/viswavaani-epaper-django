@@ -1,0 +1,167 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header_includes %}
+    <link rel="stylesheet" href="{% static 'dashboard/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'dashboard/vendors/select2-bootstrap-theme/select2-bootstrap.min.css' %}"/>
+{% endblock %}
+
+{% block footer_includes %}
+    <script src="{% static 'dashboard/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'dashboard/js/file-upload.js' %}"></script>
+    {% include 'base/image_preview.html' %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8 col-lg-8 col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Add New Paper</h4>
+                    <form class="forms-sample" id="form-add-paper" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="fDate">Select Date:</label>
+                            <input type="text" class="form-control" id="fDate" name="date" required value="{% now "d/m/Y" %}" readonly/>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Select Parent Edition</label>
+                            <select class="form-control" name="edition_id" required>
+                                <option value="" disabled selected>Select Parent Edition</option>
+                                {% for edition in editions %}
+                                    <option value="{{ edition.id }}">{{ edition.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-2">
+                                <label>Page</label>
+                            </div>
+                            <div class="col-8">
+                                <label>Select ePaper Page</label>
+                            </div>
+                            <div class="col-2">
+                                <label>Delete</label>
+                            </div>
+                        </div>
+                        <div id="page-container">
+                            <div class="row page-row">
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control page-no" placeholder="eg: 1" value="1" disabled=""/>
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <div class="form-group">
+                                        <input type="file" name="epaper[]" class="file-upload-default" accept=".pdf"/>
+                                        <div class="input-group col-xs-12">
+                                            <input type="text" class="form-control file-upload-info" disabled="" placeholder="Select ePaper Pdf"/>
+                                            <span class="input-group-append"><button class="file-upload-browse btn btn-primary" type="button">Select</button></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" class="btn btn-danger delete-page">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <button type="button" class="btn btn-sm btn-warning" id="add-page">Add Page</button>
+                        </div>
+                        <div class="row justify-content-center mt-4 mb-4">
+                            <button type="submit" class="btn btn-success mr-2">Upload New ePaper</button>
+                        </div>
+                    </form>
+                    <div id="test-cont"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-4 col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Paper</h4>
+                    <p class="card-description">Last Added Paper</p>
+                    <p class="card-description">Date : {{ recent_paper.date }}</p>
+                    <p class="card-description">Pages : {{ recent_paper.main_edition_page_count }}</p>
+
+                    <div class="card-dark-blue">
+                        <div class="card-body">
+                            <a data-url="{{ recent_paper.first_page.gif_url }}" class="vis-open-preview-model">
+                                <img class="card-img-top" src="{{ recent_paper.first_page.thumbnail_url }}"
+                                     alt="Image"/>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_code_block %}
+    <script>
+        $(document).ready(function () {
+            $('#form-add-paper').submit(function (event) {
+                event.preventDefault()
+                const formData = new FormData(this)
+                var url = "{% url 'epaper-api-add-new' %}"
+                postFormData(url, formData, function (result, response) {
+                }, true, true)
+            })
+        })
+    </script>
+
+    <script>
+        $('#fDate').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true
+        })
+    </script>
+
+    <script>
+        $(document).on('change', '.file-upload-default', function () {
+            var fileName = $(this).val().split('\\').pop()
+            $(this).siblings('.file-upload-info').val(fileName)
+        })
+        $(document).ready(function () {
+            var pageCount = 1
+
+            function addPage() {
+                pageCount++
+                var $pageRow = $('#page-container .page-row:first').clone()
+                $pageRow.find('.page-no').attr('name', 'paper_page[' + pageCount + ']')
+                $pageRow.find('.page-no').val(pageCount + '')
+                $pageRow.find('.file-input').attr('name', 'paper_file[' + pageCount + ']')
+                $pageRow.find('.file-upload-default').val('')
+                $pageRow.find('.file-upload-info').val('')
+                $('#page-container').append($pageRow)
+            }
+
+            $(document).on('change', '.file-upload-default', function () {
+                addPage()
+            })
+
+            $('#add-page').click(function () {
+                addPage()
+            })
+
+            $(document).on('click', '.delete-page', function () {
+                if (pageCount > 1) {
+                    $(this).closest('.page-row').remove()
+                    reOrderPageNumbers()
+                }
+            })
+
+            function reOrderPageNumbers() {
+                var $pageRows = $('.page-row')
+                pageCount = $pageRows.length
+                $pageRows.each(function (index) {
+                    $(this)
+                        .find('.page-no')
+                        .val(index + 1)
+                })
+            }
+        })
+    </script>
+{% endblock %}

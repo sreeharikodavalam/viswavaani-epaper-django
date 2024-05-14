@@ -1,0 +1,5 @@
+{
+    "editor.wordWrapColumn": 250,
+    "html.format.wrapLineLength": 220,
+    "diffEditor.wordWrap": "off"
+}

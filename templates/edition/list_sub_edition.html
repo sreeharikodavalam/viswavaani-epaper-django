@@ -1,0 +1,129 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Manage Editions</h4>
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Select Parent Edition</label>
+                                <select class="form-control" required onchange="onChangeParent(this)">
+                                    {% for main_edition in main_editions %}
+                                        <option value="{{ main_edition.id }}" {% if parent_id == main_edition.id %} selected {% endif %} >{{ main_edition.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for sub_edition in sub_editions %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ sub_edition.name }}</td>
+
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button "
+                                                    class="btn btn-sm {% if sub_edition.is_active %}btn-success{% else %}btn-danger{% endif %}" id="editionButton{{ sub_edition.id }}">
+                                                {% if sub_edition.is_active %}
+                                                    Active
+                                                {% else %}
+                                                    Inactive
+                                                {% endif %}
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm  {% if sub_edition.is_active %}btn-success{% else %}btn-danger{% endif %} dropdown-toggle dropdown-toggle-split"
+                                                    id="editionActionButton{{ sub_edition.id }}" data-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false">
+                                                <span class="sr-only">Change Status</span>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="editionActionButton{{ sub_edition.id }}">
+                                                <a class="dropdown-item update-status {% if sub_edition.is_active %}disabled{% endif %}" href="#"
+                                                   data-status="1" data-edition-id="{{ sub_edition.id }}">Activate Edition</a>
+                                                <a class="dropdown-item update-status {% if sub_edition.is_active == False %}disabled{% endif %}"
+                                                   href="#" data-status="0" data-edition-id="{{ sub_edition.id }}">Deactivate Editions</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-sm btn-primary" href="{% url 'editions-rename' sub_edition.id %}">Rename</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <div class="row justify-content-center mt-4">
+                                    <h4 class="text-danger">No Sub editions are added yet</h4>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <a class="btn btn-primary btn-sm mt-4 mb-4" href="{% url 'sub-editions-add-new' %}">Add sub editions</a>
+                                </div>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_code_block %}
+    <script>
+        $(document).ready(function () {
+            $('.update-status').on('click', function (event) {
+                event.preventDefault()
+                var status = $(this).data('status')
+                var editionId = $(this).data('edition-id')
+                var url = "{% url 'api-update-edition-status' %}"
+                postJsonDataAsFormData(
+                    url,
+                    {status: status, edition_id: editionId},
+                    function (result, response) {
+                        if (result && response.result == true) {
+                            updatePaperStatus(editionId, status == '1')
+                        }
+                    },
+                    true,
+                    true
+                )
+            })
+        });
+
+        function updatePaperStatus(editionId, newStatus) {
+            var editionButtonId = "#editionButton" + editionId;
+            var editionActionButtonId = "#editionActionButton" + editionId;
+            var statusText = newStatus ? "Active" : "Inactive";
+            $(editionButtonId).text(statusText);
+            $("a.update-status").removeClass("disabled");
+
+            if (newStatus) {
+                $(editionButtonId).removeClass("btn-danger").addClass("btn-success");
+                $(editionActionButtonId).removeClass("btn-danger").addClass("btn-success");
+            } else {
+                $(editionButtonId).removeClass("btn-success").addClass("btn-danger");
+                $(editionActionButtonId).removeClass("btn-success").addClass("btn-danger");
+            }
+        }
+    </script>
+    <script>
+        function onChangeParent(selectElement) {
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            var parentId = selectedOption.value;
+            window.location = "{% url 'sub-editions'%}?id=" + parentId
+        }
+    </script>
+{% endblock %}

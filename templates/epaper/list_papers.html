@@ -1,0 +1,112 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load custom_filters %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Manage ePapers</h4>
+                    <p class="card-description">
+                        <code>List ePapers</code>
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Edition</th>
+                                <th>Pages</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for paper in papers %}
+
+                                <tr>
+                                    <td>{{ papers.start_index|add:forloop.counter0 }}</td>
+                                    <td>{{ paper.date }}</td>
+                                    <td>{{ paper.edition.name }}</td>
+                                    <td>{{ paper.main_edition_page_count }}</td>
+
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" id="paperButton{{ paper.id }}"
+                                                    class="btn btn-sm {% if paper.is_active %} btn-success {% else %} btn-danger {% endif %}">
+                                                {% if paper.is_active %} Published {% else %} Unpublished {% endif %}
+
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm {% if paper.is_active %}btn-success {% else %} btn-danger{% endif %} dropdown-toggle dropdown-toggle-split"
+                                                    id="paperActionButton{{ paper.id }}" data-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false">
+                                                <span class="sr-only">Change Status</span>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="paperActionButton{{ paper.id }}">
+                                                <a class="dropdown-item update-status {% if paper.is_active %}disabled{% endif %}" href="#"
+                                                   data-status="1" data-paper-id="{{ paper.id }}">Publish ePaper</a>
+                                                <a class="dropdown-item update-status {% if paper.is_active == False %}disabled{% endif %}"
+                                                   href="#" data-status="0" data-paper-id="{{ paper.id }}">Unpublish ePaper</a>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td><a class="btn btn-sm btn-primary" href="{% url 'epaper-manage' paper_id=paper.pk %}">Manage</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {# Add pagination #}
+                    {% include 'base/pagination.html' with pages=papers %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} {% block js_code_block %}
+    <script>
+        $(document).ready(function () {
+            $(".update-status").on("click", function (event) {
+                event.preventDefault();
+                var status = $(this).data("status");
+                var paperId = $(this).data("paper-id");
+                var url = "{% url 'api-update-paper-status' %}";
+                postJsonDataAsFormData(
+                    url,
+                    {status: status, paper_id: paperId},
+                    function (result, response) {
+                        if (result && response.result == true) {
+                            updatePaperStatus(paperId, status == '1')
+                        }
+                    },
+                    true,
+                    true
+                );
+            });
+        });
+
+
+        function updatePaperStatus(paperId, newStatus) {
+            var paperButtonId = "#paperButton" + paperId;
+            var paperActionButtonId = "#paperActionButton" + paperId;
+            var statusText = newStatus ? "Published" : "Unpublished";
+            $(paperButtonId).text(statusText);
+            $("a.update-status").removeClass("disabled");
+            if (newStatus) {
+                $(paperButtonId).removeClass("btn-danger").addClass("btn-success");
+                $(paperActionButtonId).removeClass("btn-danger").addClass("btn-success");
+                $("a.update-status[data-paper-id='" + paperId + "'][data-status='1']").addClass("disabled");
+            } else {
+                $(paperButtonId).removeClass("btn-success").addClass("btn-danger");
+                $(paperActionButtonId).removeClass("btn-success").addClass("btn-danger");
+                $("a.update-status[data-paper-id='" + paperId + "'][data-status='0']").addClass("disabled");
+            }
+        }
+    </script>
+{% endblock %}

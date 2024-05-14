@@ -1,0 +1,215 @@
+{% extends 'base/base.html' %} {% load static %} {% load custom_filters %}
+{% block footer_includes %}
+    {% include 'base/image_preview.html' %}
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="card-title cm-strong">
+                ePaper - {{ paper.edition.name }} - {{ paper.date }}
+            </h4>
+            <p class="card-description mb-4">
+                <code>Manage ePaper</code>
+            </p>
+            <div class="row mt-2">
+                <div class="col-lg-8 col-sm-12 col-md-12">
+
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <button type="button" class="btn btn-primary button-save-page-order m-4">Save New Order</button>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row" id="papersList">
+                            {% for page in pages %}
+                                <div class="col-md-3 mb-4" data-id="{{ page.id }}">
+                                    <div class="card position-relative" draggable="true">
+                                        <div class="card-body">
+                                            <a data-url="{{ page.gif_url }}" class="vis-open-preview-model">
+                                                <img class="card-img-top" src="{{ page.thumbnail_url }}" alt="Image"/>
+                                            </a>
+                                            <!-- Delete icon -->
+                                            <div class="paper-delete-icon">
+                                                <strong><span class="text-center text-black mr-1 ml-1 page-num-counter">{{ forloop.counter }}</span></strong>
+                                                <a class="delete-paper-page" href="#" data-page-id="{{ page.id }}">
+                                                    <i class="icon-trash"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <button type="button" class="btn btn-primary button-save-page-order m-4">Save New Order</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-12">
+                    <div class="card p-0 m-0">
+                        <div class="card-body ml-1">
+                            <p>Add Additional Pages</p>
+                            <form id="form-add-paper" method="post" enctype="multipart/form-data">
+                                <input hidden name="paper_id" value="{{ paper.id }}">
+                                <div class="row">
+                                    <div class="col-9 m-0 p-0 ml-2">
+
+                                        <div class="form-group">
+                                            <input type="file" name="epaper" class="file-upload-default" accept=".pdf"/>
+                                            <div class="input-group col-xs-12">
+                                                <input type="text" class="form-control file-upload-info" disabled="" placeholder="Select ePaper Pdf"/>
+                                                <span class="input-group-append"><button class="file-upload-browse btn btn-primary" type="button">Select</button></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-2 m-0 p-0 ml-1">
+                                        <button class="btn btn-primary" type="submit">Add</button>
+                                    </div>
+
+                                </div>
+                            </form>
+                            <hr>
+                            <div class="row">
+                                <h4 class="m-3">ePaper Status : </h4>
+
+                                <div class="btn-group">
+                                    <button type="button" id="paperButton{{ paper.id }}"
+                                            class="btn {% if paper.is_active %} btn-success {% else %} btn-danger {% endif %}">
+                                        {% if paper.is_active %} Published {% else %} Unpublished {% endif %}
+
+                                    </button>
+                                    <button type="button"
+                                            class="btn {% if paper.is_active %}btn-success {% else %} btn-danger{% endif %} dropdown-toggle dropdown-toggle-split"
+                                            id="paperActionButton{{ paper.id }}" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                        <span class="sr-only">Change Status</span>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="paperActionButton{{ paper.id }}">
+                                        <a class="dropdown-item update-status {% if paper.is_active %}disabled{% endif %}" href="#"
+                                           data-status="1" data-paper-id="{{ paper.id }}">Publish ePaper</a>
+                                        <a class="dropdown-item update-status {% if paper.is_active == False %}disabled{% endif %}"
+                                           href="#" data-status="0" data-paper-id="{{ paper.id }}">Unpublish ePaper</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %} {% block js_code_block %}
+
+    <script src="{% static 'dashboard/js/file-upload.js' %}"></script>
+    <script src="{% static 'dashboard/js/Sortable.js' %}"></script>
+    <script src="{% static 'dashboard/js/alerts.js' %}"></script>
+
+    <script>
+        let nePageOrder = [];
+        Sortable.create(papersList, {
+            onEnd: function (evt) {
+                nePageOrder = [];
+                const sortedItems = evt.item.parentElement.children;
+                for (let i = 0; i < sortedItems.length; i++) {
+                    const item = sortedItems[i];
+                    const imageId = item.getAttribute("data-id");
+                    nePageOrder.push(imageId);
+                }
+                savePageOrderButton.show()
+                console.log(nePageOrder); // Output: New order of data-ids after sorting
+            },
+        });
+
+    </script>
+    <script>
+        let savePageOrderButton
+        $(document).ready(function () {
+            savePageOrderButton = $('.button-save-page-order');
+            savePageOrderButton.hide()
+            savePageOrderButton.click(function () {
+                var data = {'paper_id': {{paper.pk}}, 'page_order': nePageOrder}
+                postJsonData("{% url 'api-reorder-epaper' %}", data, function (result, response) {
+                    savePageOrderButton.hide()
+                    var pageNumbers = $(".page-num-counter");
+                    console.log(pageNumbers)
+                    pageNumbers.each(function (index) {
+                        $(this).text(index + 1)
+                    });
+                }, true, true)
+            })
+
+            $('#form-add-paper').submit(function (event) {
+                event.preventDefault()
+                const formData = new FormData(this)
+                var url = "{% url 'epaper-api-add-additional-paper' %}"
+                postFormData(url, formData, function (result, response) {
+                    setTimeout(function () {
+                        window.location.reload()
+                    }, 200)
+                }, true, true)
+            })
+        })
+    </script>
+
+    <!-- epaper status handler -->
+    <script>
+        $(document).ready(function () {
+            $(".update-status").on("click", function (event) {
+                event.preventDefault();
+                var status = $(this).data("status");
+                var paperId = $(this).data("paper-id");
+                var url = "{% url 'api-update-paper-status' %}";
+                postJsonDataAsFormData(
+                    url,
+                    {status: status, paper_id: paperId},
+                    function (result, response) {
+                        if (result && response.result == true) {
+                            updatePaperStatus(paperId, status == '1')
+                        }
+                    },
+                    true,
+                    true
+                );
+            });
+        });
+
+
+        function updatePaperStatus(paperId, newStatus) {
+            var paperButtonId = "#paperButton" + paperId;
+            var paperActionButtonId = "#paperActionButton" + paperId;
+            var statusText = newStatus ? "Published" : "Unpublished";
+            $(paperButtonId).text(statusText);
+            $("a.update-status").removeClass("disabled");
+            if (newStatus) {
+                $(paperButtonId).removeClass("btn-danger").addClass("btn-success");
+                $(paperActionButtonId).removeClass("btn-danger").addClass("btn-success");
+                $("a.update-status[data-status='1']").addClass("disabled");
+            } else {
+                $(paperButtonId).removeClass("btn-success").addClass("btn-danger");
+                $(paperActionButtonId).removeClass("btn-success").addClass("btn-danger");
+                $("a.update-status[data-status='0']").addClass("disabled");
+
+            }
+        }
+    </script>
+    <script>
+        $('a.delete-paper-page').click(function () {
+            const pageId = $(this).data("page-id")
+            showConfirmationAlert("Are you sure?", "Are sure want to delete this page from ePaper?", function () {
+                const dataJson = {'page_id': pageId, 'paper_id': {{ paper.id }}}
+                console.log(dataJson)
+                postJsonDataAsFormData("{% url 'api-delete-epaper-page' %}", dataJson, function (status, response) {
+                    if (status && response.result){
+
+                    }
+                }, true, true)
+            })
+        });
+    </script>
+{% endblock js_code_block %}
+
+

@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"html.validate.scripts": false,
+		"diffEditor.wordWrap": "off",
+
+	},
+	"extensions": {
+		"recommendations": [
+
+		]
+	}
+}

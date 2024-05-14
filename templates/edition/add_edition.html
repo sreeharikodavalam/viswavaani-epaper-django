@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block body %}
+  <div class="row">
+    <div class="col-md-6 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Add New Edition</h4>
+          <form class="forms-sample" method="post" id="form-add-editions">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Edition title</label>
+              <input type="text" class="form-control" name="name" placeholder="New edition name" required />
+            </div>
+            <button type="submit" class="btn btn-success mr-2">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js_code_block %}
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('#form-add-editions').submit(function (event) {
+        event.preventDefault()
+        const formData = new FormData(this)
+        var url = "{% url 'editions-add-new-api' %}"
+        postFormData(url, formData, callback, true, true)
+      })
+    })
+    function callback(status, response) {
+      console.log(response)
+    }
+  </script>
+{% endblock %}

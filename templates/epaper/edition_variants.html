@@ -1,0 +1,200 @@
+<!-- add_sub_edition.html -->
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header_includes %}
+    <link rel="stylesheet" href="{% static 'dashboard/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'dashboard/vendors/select2-bootstrap-theme/select2-bootstrap.min.css' %}"/>
+{% endblock %}
+
+{% block footer_includes %}
+    <script src="{% static 'dashboard/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'dashboard/js/file-upload.js' %}"></script>
+
+    {% include 'base/image_preview.html' %}
+{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Manage ePaper Variants</h4>
+                    <form class="forms-sample" method="post" id="form-epaper-variants">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-lg-3 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="fDate" name="date" required value="{% now "d/m/Y" %}" readonly/>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <select class="form-control" name="main_edition" id="select-main-edition" required>
+                                        <option value="" disabled selected>Main Edition</option>
+                                        {% for edition in main_editions %}
+                                            <option value="{{ edition.id }}">{{ edition.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <select class="form-control" name="sub_edition" id="select-sub-edition" required>
+                                        <option value="" disabled selected>Sub Edition</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-success mr-2">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <div class="col-md-8 col-sm-12">
+                        <div class="row" id="container-papers">
+                            <!-------- HERE -------------->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_code_block %}
+    <script type="text/javascript">
+        var subEditionId = '';
+        var paperId = '';
+        $(document).ready(function () {
+            /// Init date picker
+            $('#fDate').datepicker({format: 'dd/mm/yyyy', autoclose: true})
+            $('#form-epaper-variants').submit(function (event) {
+                event.preventDefault()
+                const jsonData = serializeFormData(this)
+                postJsonData('{% url 'api-find-main-edition-paper-release' %}', jsonData, function (status, data) {
+                    populatePaperResults(data)
+                }, true, true)
+            })
+
+            $('#select-main-edition').change(function () {
+                postJsonDataAsFormData("{% url 'api-sub-editions'  %}", {edition_id: $(this).val()}, function (status, data) {
+                    if (status) {
+                        $('#select-sub-edition').html('<option value="" disabled selected>Sub Edition</option>')
+                        data.editions.forEach(function (item) {
+                            $('#select-sub-edition').append($('<option>', {value: item.id, text: item.name}));
+                        })
+                    }
+                }, true, false)
+            })
+        })
+
+        function populatePaperResults(data) {
+            const container = $('#container-papers');
+            container.empty(); // Clear previous results
+
+            if (data.result && data.data && data.data.paper_pages) {
+                const paperPages = data.data.paper_pages;
+                subEditionId = data.data.sub_edition_id;
+                paperId = data.data.paper_id;
+                paperPages.forEach((page) => {
+                    const mainPaperHtml = buildPaperImageHtml(page.gif_url, page.thumbnail_url, page.id);
+                    container.append(mainPaperHtml);
+                    container.append('<div class="col-2"> <i class="icon-arrow-right center" style="margin-top: 120px"></i> </div>');
+                    if (page.has_variant) {
+                        const variantPaperHtml = buildPaperImageHtml(page.variant_gif_url, page.variant_thumnail_url, page.variant_id, page.id, true);
+                        container.append(variantPaperHtml);
+                    } else {
+                        const variantPaperHtml = buildVariationSubmitForm(page.id)
+                        container.append(variantPaperHtml);
+                    }
+                });
+            }
+        }
+
+        function buildVariationSubmitForm(pageId) {
+            return `<div class="col-5" style="margin-top: 80px" data-variant-form="${pageId}">
+                        <form class="form-add-paper-variant">
+                            <input hidden value="${pageId}" name="page_id"/>
+                            <input hidden value="${subEditionId}" name="edition_id"/>
+                            <div class="form-group mt-4" >
+                                <input type="file" name="epaper[]" class="file-upload-default" accept=".pdf"/>
+                                <div class="input-group col-xs-12">
+                                    <input type="text" class="form-control file-upload-info" disabled="" placeholder="Select ePaper Pdf"/>
+                                    <span class="input-group-append"><button class="file-upload-browse btn btn-primary" type="button">Select</button></span>
+                                </div>
+                                <div class="row justify-content-center">
+                                <button type="submit" class="btn btn-sm btn-primary delete-page mt-4">Upload Variant</button></div>
+                            </div>
+                        </form>
+                    </div>`;
+        }
+
+        function buildPaperImageHtml(gifUrl, thumbnailUrl, pageId,parentPageId = '',  showDelete = false) {
+            var deleteButton = (showDelete === true) ? `<div class="paper-delete-icon">
+                                    <a class="delete-paper-page" href="#" data-page-id="${pageId}" data-parent-page-id="${parentPageId}">
+                                        <i class="icon-trash"></i>
+                                    </a>
+                                </div>` : ``;
+
+
+            return `<div class="col-5" data-variant-image="${pageId}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-dark-blue">
+                                    <div class="card-body position-relative">
+                                        <a data-url="${thumbnailUrl}" class="vis-open-preview-model">
+                                            <img class="" src="${gifUrl}" alt="Image"  height="200px"/>
+                                        </a>
+                                        ${deleteButton}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`
+                ;
+        }
+
+    </script>
+
+    <script>
+        $(document).on('submit', '.form-add-paper-variant', function (event) {
+            event.preventDefault()
+            const formData = new FormData(this)
+            var url = "{% url 'api-upload-paper-variant' %}"
+            const parentDiv = $(this).closest('div');
+            postFormData(url, formData, function (result, response) {
+                if (result && response.result) {
+                    parentDiv.replaceWith(buildPaperImageHtml(response.data.variant_gif_url, response.data.variant_thumbnail_url, response.data.variant_id, response.data.page_id, true));
+                }
+            }, true, true)
+
+        });
+
+
+        function replaceVariantImageWithForm(parentPageId, pageId) {
+            const image = $('div[data-variant-image="' + pageId + '"]');
+            image.replaceWith(buildVariationSubmitForm(parentPageId));
+        }
+    </script>
+
+    <script>
+        $(document).on('click', '.delete-paper-page', function () {
+            console.log("onclick delete")
+            const pageId = $(this).data("page-id")
+            const parentPageId = $(this).data("parent-page-id")
+            console.log("parentid = "+parentPageId)
+            showConfirmationAlert("Are you sure?", "Are sure want to delete this page from ePaper?", function () {
+                const dataJson = {'page_id': pageId, 'paper_id': paperId}
+                console.log(dataJson)
+                postJsonDataAsFormData("{% url 'api-delete-epaper-page' %}", dataJson, function (status, response) {
+                    if (status && response.result) {
+                        replaceVariantImageWithForm(parentPageId, pageId);
+                    }
+                }, true, true)
+            })
+        });
+    </script>
+{% endblock %}
