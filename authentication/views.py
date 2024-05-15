@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth import authenticate,login as core_login
+from django.contrib.auth import authenticate, login as core_login
 from django.urls import reverse
+from django.contrib.auth.views import auth_logout
 
 
 # Create your views here.
@@ -17,3 +18,9 @@ def login(request):
                 return redirect(reverse('epaper-home'))
         login_failed = True
     return render(request, 'authentication/login.html', {'login_failed': login_failed})
+
+
+def logout(request):
+    auth_logout(request)
+    redirect(reverse('login'))
+    return render(request, 'authentication/login.html', {'login_failed': False})
