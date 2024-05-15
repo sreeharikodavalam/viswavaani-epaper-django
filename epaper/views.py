@@ -1,4 +1,6 @@
 import json
+
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 from edition.models import Edition
@@ -6,6 +8,7 @@ from epaper.models import Paper, PaperPage
 from django.core.serializers import serialize
 
 
+@login_required
 def home(request):
     paper_list = Paper.objects.order_by('-date').all()
     paginator = Paginator(paper_list, 10)
@@ -14,6 +17,7 @@ def home(request):
     return render(request, 'epaper/list_papers.html', {'papers': papers})
 
 
+@login_required
 def manage(request, paper_id):
     paper = get_object_or_404(Paper, pk=paper_id)
     pages = PaperPage.objects.filter(paper=paper).order_by('page_number')
@@ -21,20 +25,24 @@ def manage(request, paper_id):
                   {'paper': paper, 'pages': pages, 'pages_json': json.dumps(serialize('json', pages), indent=4)})
 
 
+@login_required
 def add_new_paper(request):
     recent_paper = Paper.objects.order_by('-date').first()
     editions = Edition.objects.filter(is_main=True)
     return render(request, 'epaper/add_new_paper.html', {'editions': editions, 'recent_paper': recent_paper})
 
 
+@login_required
 def variants(request):
     main_editions = Edition.get_main_editions()
     data = {'main_editions': main_editions}
     return render(request, 'epaper/edition_variants.html', data)
 
 
+@login_required
 def epaper_home(request):
-    main_editions = Edition.get_main_editions()
-    sub_editions = Edition.get_sub_editions(main_editions.first().id)
-    data = {'main_editions': main_editions, 'sub_editions': sub_editions}
-    return render(request, 'epaper/view_paper.html', data)
+    if main_editions := Edition.get_main_editions():
+        if sub_editions := Edition.get_sub_editions(main_editions.first().id):
+            data = {'main_editions': main_editions, 'sub_editions': sub_editions}
+            return render(request, 'epaper/view_paper.html', data)
+    return render(request, 'epaper/view_paper.html', {'main_editions': [], 'sub_editions': []})
