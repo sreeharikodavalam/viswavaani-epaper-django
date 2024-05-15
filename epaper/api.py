@@ -215,9 +215,9 @@ def epaper_home_data(request):
     print(date)
     print(request.POST)
     sub_edition_id = request.POST.get('sub_edition', 0)
-    sub_edition = Edition.objects.filter(is_main=False, pk=sub_edition_id).first() or Edition.objects.filter(is_main=False).first()
+    sub_edition = Edition.objects.filter(is_main=False, pk=sub_edition_id, is_active=True).first() or Edition.objects.filter(is_main=False, is_active=True).first()
     print(sub_edition)
-    if paper := Paper.objects.filter(edition=sub_edition.parent, date=date_obj).first():
+    if paper := Paper.objects.filter(edition=sub_edition.parent, date=date_obj, is_active=True).first():
         if pages := _get_paper_pages_for_home(paper, sub_edition):
             return JsonResponse({'result': True, 'message': 'OK', 'pages': pages})
     return JsonResponse({'result': False, 'message': 'No paper available.', 'pages': []}, safe=False)

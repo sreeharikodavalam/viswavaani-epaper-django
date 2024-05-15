@@ -60,14 +60,22 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         temp_file = BytesIO()
         blank_image.save(temp_file, format=file_extension)
         return JsonResponse({'result': True, 'message': "OK", "data": upload_s3(temp_file, file_extension)}, safe=False)
+    except PaperPage.DoesNotExist:
+        print("Paper page does not exist.")
+        return JsonResponse({'result': False, 'message': "Paper page does not exist."}, safe=False)
 
-    except:
+    except Exception as e:
+        print("An error occurred while generating paper share image.")
         return JsonResponse({'result': False, 'message': "Something went wrong..."}, safe=False)
 
 
 def upload_s3(temp_file, file_extension):
-    bucket_path = f"share/{uuid.uuid4()}.{file_extension}"
-    boto = R2Boto()
-    temp_file.seek(0)
-    boto.upload_file_obj(temp_file, bucket_path)
-    return boto.get_url(bucket_path)
+    try:
+        bucket_path = f"share/{uuid.uuid4()}.{file_extension}"
+        boto = R2Boto()
+        temp_file.seek(0)
+        boto.upload_file_obj(temp_file, bucket_path)
+        return boto.get_url(bucket_path)
+    except Exception as e:
+        print("An error occurred while uploading to S3.")
+        raise
