@@ -16,8 +16,8 @@ $(document).ready(function () {
     $(".cropme").click(function () {
         initJcrop();
     });
-    $('.subscribe').click(function () {
-        $('#submodal').modal('show');
+    $(document).on("click", ".subscribe", function (event) {
+        $('#subscribe-modal').modal('show');
     });
 });
 

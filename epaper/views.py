@@ -39,7 +39,6 @@ def variants(request):
     return render(request, 'epaper/edition_variants.html', data)
 
 
-@login_required
 def epaper_home(request):
     if main_editions := Edition.objects.filter(is_main=True, is_active=True):
         if sub_editions := Edition.get_sub_editions(main_editions.first().id):

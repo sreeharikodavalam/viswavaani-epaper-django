@@ -3,9 +3,6 @@ from django.contrib.auth import authenticate, login as core_login
 from django.urls import reverse
 from django.contrib.auth.views import auth_logout
 
-
-# Create your views here.
-
 def login(request):
     login_failed = False
     if request.method == 'POST':
