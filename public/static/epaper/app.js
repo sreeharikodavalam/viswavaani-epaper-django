@@ -21,6 +21,13 @@ $(document).ready(function () {
     });
 });
 
+function destroyJcrop() {
+    if (jCropInitButton === true) {
+        jCropInitButton = false;
+        jcropAPI.destroy()
+    }
+}
+
 function initJcrop() {
     if (jCropInitButton === false) {
         containerActiveImage.Jcrop({
@@ -168,6 +175,9 @@ function updatePaperPageResult(data) {
 }
 
 function updateActivePage(id) {
+    showFullLoader()
+    destroyJcrop()
+    containerActiveImage.attr('src', '')
     activePageId = parsePageId(id);
     $(".active-page-number").html(activePageId)
     $('.page-thumbnail').each(function () {
@@ -183,6 +193,11 @@ function updateActivePage(id) {
     containerActivePageNumber.html(activePageId)
 }
 
+containerActiveImage.on("load", function () {
+    hideFullLoader()
+}).on("error", function () {
+    hideFullLoader()
+});
 $(document).on("click", ".page-thumbnail,  .page-numbers", function (event) {
     const pageId = $(this).data('id');
     updateActivePage(pageId);
