@@ -43,7 +43,10 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         blank_image.paste(cropped_image, (0, header_height))
 
         # Load the logo image
-        logo_path = os.path.join(settings.STATICFILES_DIRS[0], 'logo-white-bg.jpg')
+        if settings.DEBUG:
+            logo_path = os.path.join(settings.STATICFILES_DIRS[0], 'logo-white-bg.jpg')
+        else:
+            logo_path = os.path.join(settings.STATIC_ROOT, 'logo-white-bg.jpg')
         logo_image = Image.open(logo_path)
 
         # Resize the logo image if necessary
