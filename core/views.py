@@ -27,7 +27,7 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         page = PaperPage.objects.filter(pk=page_id).first()
         response = requests.get(page.gif_url)
         if response.status_code != 200:
-            return None
+            return JsonResponse({'result': False, 'message': "Cant find paper page files"}, safe=False)
 
         image = Image.open(BytesIO(response.content))
         cropped_image = image.crop((x, y, x + w, y + h))
@@ -36,6 +36,7 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         file_extension = original_content_type.split('/')[-1]
 
         # Create a blank image with the same width as the cropped image and a height for the header
+
         header_height = 200  # Adjust the height as needed
         blank_image = Image.new('RGB', (cropped_image.width, cropped_image.height + header_height), color='white')
 
@@ -47,7 +48,7 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         logo_image = Image.open(logo_path)
 
         # Resize the logo image if necessary
-        max_logo_size = (180)  # Adjust the maximum logo size as needed
+        max_logo_size = (180, 180)  # Adjust the maximum logo size as needed
         logo_image.thumbnail(max_logo_size)
 
         # Calculate the position to place the logo at the center
@@ -66,6 +67,7 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
 
     except Exception as e:
         print("An error occurred while generating paper share image.")
+        print(e)
         return JsonResponse({'result': False, 'message': "Something went wrong..."}, safe=False)
 
 
