@@ -23,4 +23,4 @@ class PaperCut(models.Model):
         return f"{self.date} - {self.id}"
 
     def share_url(self):
-        return f"{BASE_URL}reverse('share-paper-cut', args=[str(self.id)])"
+        return f"{BASE_URL}{reverse('share-paper-cut', args=[str(self.id)])}"

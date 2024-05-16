@@ -253,8 +253,12 @@ function buildPageNumbers(page) {
 
 function updateShareLinks(shareData) {
     const  url = shareData.image_url;
+    const  shareUrl = shareData.share_url;
+    
+    window.location.href = `https://wa.me/?text=Vishwavani ePaper : ${encodeURIComponent(shareUrl)}`;
+
     // WhatsApp Share Icon
-    $(".whatsapp").attr("href", "whatsapp://send?text=Check%20out%20this%20awesome%20content!%20" + encodeURIComponent(url));
+    $(".whatsapp").attr("href", `https://wa.me/?text=Vishwavani ePaper : ${encodeURIComponent(shareUrl)}`);
     // Facebook Share Icon
     $(".facebook").attr("href", "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url));
     // Twitter Share Icon

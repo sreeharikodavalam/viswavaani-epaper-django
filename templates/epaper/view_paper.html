@@ -36,6 +36,7 @@
     </div>
     <div class="col-lg-3 py-2 d-lg-flex align-items-center justify-content-center blue edselcol">
         <form class="forms-sample" method="post" id="form-epapers">
+            {% csrf_token %}
             <div class="edsel d-flex">
                 <input type="text" name="date" id="datepicker" placeholder="Date" class=""> &nbsp;
                 <select class="edtn" id="select-main-edition">
@@ -87,7 +88,7 @@
                     </button>
                 </div>
             </div>
-            <div class="progress mt-4 mb-4" >
+            <div class="progress mt-4 mb-4">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
             </div>
             <div class=" preview-items mainimg mt-3" id="crop-container">
@@ -173,21 +174,21 @@
                 <p class="mt-2 bold">Share on social media</p>
                 <div class="share-icons mt-3">
                     <!-- WhatsApp Share Icon -->
-                    <a href="whatsapp://send?text=Check out this awesome content! https://example.com" class="share-icon whatsapp share-link">
+                    <a href="#" class="share-icon whatsapp share-link">
                         <i class="fab fa-whatsapp"></i>
                     </a>
                     <!-- Facebook Share Icon -->
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com" class="share-icon facebook" target="_blank">
+                    <a href="#" class="share-icon facebook" target="_blank">
                         <i class="fab fa-facebook-f"></i>
                     </a>
                     <!-- Twitter Share Icon -->
-                    <a href="https://twitter.com/intent/tweet?url=https://example.com&text=Check%20out%20this%20awesome%20content!" class="share-icon twitter" target="_blank">
+                    <a href="#" class="share-icon twitter" target="_blank">
                         <i class="fab fa-twitter"></i>
                     </a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com" class="share-icon text-success download-button" target="_blank">
+                    <a href="#" class="share-icon text-success download-button" target="_blank">
                         <i class="fa fa-download"></i>
                     </a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://example.com" class="share-icon text-secondary download-button" target="_blank">
+                    <a href="#" class="share-icon text-secondary download-button" target="_blank">
                         <i class="fa fa-copy"></i>
                     </a>
                 </div>

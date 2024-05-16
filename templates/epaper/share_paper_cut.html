@@ -114,23 +114,23 @@
                 <p class="mt-2 bold">Share on social media</p>
                 <div class="share-icons mt-3">
                     <!-- WhatsApp Share Icon -->
-                    <button type="button" onclick="shareToWhatsApp()" class="share-icon whatsapp">
+                    <a type="button" onclick="shareToWhatsApp()" class="share-icon whatsapp">
                         <i class="fab fa-whatsapp"></i>
-                    </button>
+                    </a>
                     <!-- Facebook Share Icon -->
-                    <button type="button" onclick="shareToFacebook()" class="share-icon facebook">
+                    <a type="button" onclick="shareToFacebook()" class="share-icon facebook">
                         <i class="fab fa-facebook-f"></i>
-                    </button>
+                    </a>
                     <!-- Twitter Share Icon -->
-                    <button type="button" onclick="shareToTwitter()" class="share-icon twitter">
+                    <a type="button" onclick="shareToTwitter()" class="share-icon twitter">
                         <i class="fab fa-twitter"></i>
-                    </button>
-                    <button type="button" onclick="downloadFromUrl()" class="share-icon text-success">
+                    </a>
+                    <a type="button" onclick="downloadFromUrl()" class="share-icon text-success">
                         <i class="fa fa-download"></i>
-                    </button>
-                    <button type="button" onclick="downloadFromUrl()" class="share-icon text-secondary">
+                    </a>
+                    <a type="button" onclick="downloadFromUrl()" class="share-icon text-secondary">
                         <i class="fa fa-copy"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -160,11 +160,11 @@
     }
 
     function shareToTwitter() {
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=Check%20out%20Vishwavani%20ePaper:%20${encodeURIComponent(shareUrl)}`, 'twitter-share', 'width=550,height=400');
+        window.location.href = `https://twitter.com/intent/tweet?url="${encodeURIComponent(shareUrl)}"&text=Vishwavani ePaper"`;
     }
 
     function shareToFacebook() {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, 'facebook-share', 'width=600,height=400');
+        window.location.href = `https://www.facebook.com/sharer/sharer.php?u="${encodeURIComponent(imageUrl)}"&text=Vishwavani ePaper : ${encodeURIComponent(shareUrl)}"`;
     }
 
     function downloadFromUrl() {
