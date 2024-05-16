@@ -1,337 +1,218 @@
-        body {
-
-            overflow-x: hidden;
-
-        }
-
-
-
-        a {
-
-            text-decoration: none;
-
-        }
-
-
-
-        a:active{
-
-            text-decoration: none;
-
-        }
-
-        a:visited {
-
-            text-decoration: none;
-
-        }
-
-
-
-        .grad {
-
-            background: rgb(57, 115, 185);
-
-            background: -moz-linear-gradient(79deg, rgba(57, 115, 185, 1) 0%, rgba(227, 2, 15, 1) 100%);
-
-            background: -webkit-linear-gradient(79deg, rgba(57, 115, 185, 1) 0%, rgba(227, 2, 15, 1) 100%);
-
-            background: linear-gradient(79deg, rgba(57, 115, 185, 1) 0%, rgba(227, 2, 15, 1) 100%);
-
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#3973b9", endColorstr="#e3020f", GradientType=1);
-
-        }
-
-
-
-        .blue {
-
-            background: #3973b9
-
-        }
-
-
-
-        
-
-
-
-        .edsel {
-
-            padding: 5px 10px
-
-        }
-
-
-
-        #datepicker {
-
-            max-width: 100px;
-
-            border-radius: 5px;
-
-            font-size: 14px;
-
-            color: #000000;
-
-            padding-left: 10px;
-
-        }
-
-        @media (max-width: 767px) {
-            #datepicker {
-              width: 60px; /* Set width to 60px for mobile devices */
-            }
-          }
-
-
-
-        .shdw {
-
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-        }
-
-
-
-        .edtn {
-
-            border-left: 2px solid #000000 !important;
-
-            border-top: 2px solid #000000 !important;
-
-        }
-
-
-
-        .secbg {
-
-            background: #323639;
-
-            color: #FFFFFF
-
-        }
-
-
-
-        .mainsec {
-
-            margin: 0;
-
-        }
-
-
-
-        .thumb {
-
-            margin-bottom: 50px;
-
-            padding: 2px;
-
-            border-top-left-radius: 6px;
-
-            border-top-right-radius: 5px;
-
-            background: #FFFFFF;
-
-        }
-
-
-
-        .thumbactive {
-
-            background-color: #FFFFFF;
-
-            border: 2px solid black;
-
-            opacity: 0.7;
-
-        }
-
-
-
-        .thumbactive .red-box {
-
-            background-color: #3973b9;
-
-        }
-
-
-
-        .thumbactive img {
-
-            filter: brightness(0.5);
-
-        }
-
-
-
-        .red-box {
-
-            margin-top: -29px;
-
-            position: relative;
-
-            background-color: #DD0525;
-
-            padding: 5px 10px;
-
-            text-align: center;
-
-            font-weight: bold;
-
-        }
-
-
-
-        .red-box p {
-
-            margin: 0;
-
-            color: white;
-
-        }
-
-
-
-        .newscanvas {
-
-            background: #edebee;
-
-        }
-
-
-
-        .pagenum {
-
-            font-size: 1.3em;
-
-            margin-right: 20px
-
-        }
-
-
-
-        .bold {
-
-            font-weight: bold;
-
-        }
-
-
-
-        .fixed-circle-left {
-
-            z-index: 9999;
-
-            position: fixed;
-
-            left: 20%;
-
-            top: 60%;
-
-            transform: translateY(-50%);
-
-            width: 60px;
-
-            height: 60px;
-
-            background-color: rgba(0, 0, 0, 0.3);
-
-            /* Transparent background color */
-
-            border-radius: 50%;
-
-            /* Make it a circle */
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            font-size: 1.5em;
-
-        }
-
-
-
-        .fixed-circle-right {
-
-            z-index: 9999;
-
-            position: fixed;
-
-            right: 11.5%;
-
-            top: 60%;
-
-            transform: translateY(-50%);
-
-            width: 60px;
-
-            height: 60px;
-
-            background-color: rgba(0, 0, 0, 0.3);
-
-            /* Transparent background color */
-
-            border-radius: 50%;
-
-            /* Make it a circle */
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            font-size: 1.5em;
-
-        }
-
-
-
-
-
-        .share-icons {
-
-            display: flex;
-
-            justify-content: space-around;
-
-            align-items: center;
-
-            background-color: #f0f0f0;
-
-            padding: 20px 0;
-
-          }
-
-          .share-icon {
-
-            font-size: 30px;
-
-            background-color: #FFFFFF;padding:8px;
-
-            min-width: 50px;
-
-          }
-
-          .whatsapp {
-
-            color: #25d366; /* WhatsApp brand color */
-
-          }
-
-          .facebook {
-
-            color: #1877f2; /* Facebook brand color */
-
-          }
-
-          .twitter {
-
-            color: #1da1f2; /* Twitter brand color */
-
-          }
+body {
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+.grad {
+    background: rgb(57, 115, 185);
+    background: -moz-linear-gradient(79deg, rgba(57, 115, 185, 1) 0%, rgba(227, 2, 15, 1) 100%);
+    background: -webkit-linear-gradient(79deg, rgba(57, 115, 185, 1) 0%, rgba(227, 2, 15, 1) 100%);
+    background: linear-gradient(79deg, rgba(57, 115, 185, 1) 0%, rgba(227, 2, 15, 1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#3973b9", endColorstr="#e3020f", GradientType=1);
+}
+
+.blue {
+    background: #3973b9
+}
+
+.edsel {
+    padding: 5px 10px
+}
+
+#datepicker {
+    max-width: 100px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #000000;
+    padding-left: 10px;
+}
+
+@media (max-width: 767px) {
+    #datepicker {
+        width: 60px; /* Set width to 60px for mobile devices */
+    }
+}
+
+.shdw {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.edtn {
+    border-left: 2px solid #000000 !important;
+    border-top: 2px solid #000000 !important;
+}
+
+.secbg {
+    background: #323639;
+    color: #FFFFFF
+}
+
+.mainsec {
+    margin: 0;
+}
+
+.thumb {
+    margin-bottom: 50px;
+    padding: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 5px;
+    background: #FFFFFF;
+}
+
+.thumbactive {
+    background-color: #FFFFFF;
+    border: 2px solid black;
+    opacity: 0.7;
+}
+
+.thumbactive .red-box {
+    background-color: #3973b9;
+}
+
+.thumbactive img {
+    filter: brightness(0.5);
+}
+
+.red-box {
+    margin-top: -29px;
+    position: relative;
+    background-color: #DD0525;
+    padding: 5px 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.red-box p {
+    margin: 0;
+    color: white;
+}
+
+.newscanvas {
+    background: #edebee;
+}
+
+.pagenum {
+    font-size: 1.3em;
+    margin-right: 20px
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.fixed-circle-left {
+    z-index: 9999;
+    position: fixed;
+    left: 20%;
+    top: 60%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Transparent background color */
+    border-radius: 50%;
+    /* Make it a circle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+}
+
+.fixed-circle-right {
+    z-index: 9999;
+    position: fixed;
+    right: 11.5%;
+    top: 60%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Transparent background color */
+    border-radius: 50%;
+    /* Make it a circle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+}
+
+.share-icons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 20px 0;
+}
+
+.share-icon {
+    font-size: 30px;
+    background-color: #FFFFFF;
+    padding: 8px;
+    min-width: 50px;
+}
+
+.whatsapp {
+    color: #25d366; /* WhatsApp brand color */
+}
+
+.facebook {
+    color: #1877f2; /* Facebook brand color */
+}
+
+.twitter {
+    color: #1da1f2; /* Twitter brand color */
+}
+
+#progress-bar {
+    height: 30px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+section {
+    overflow-x: hidden;
+}
+
+#crop-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10;
+    display: none;
+}
+
+.crop-btn {
+    padding: 10px 15px;
+    background: #f00;
+    color: #FFF;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: bold;
+    border: 0;
+    z-index: 1000;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0
+}

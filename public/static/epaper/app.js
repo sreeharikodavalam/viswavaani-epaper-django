@@ -78,12 +78,12 @@ function updateImageDimensions() {
 function cropImage() {
     const pos = lastCropPositions;
     const pageData = activePageData();
-    const url = `/share/${pageData.page_id}/${pos.x}/${pos.y}/${pos.w}/${pos.h}`;
+    const url = `/share/api/${pageData.page_id}/${pos.x}/${pos.y}/${pos.w}/${pos.h}`;
     postJsonData(url, {}, function (result, response) {
         if (result && response.data) {
-            var shareImageUrl = response.data;
-            containerImagePreview.attr('src', shareImageUrl);
-            updateShareLinks(shareImageUrl)
+            const shareData = response.data;
+            containerImagePreview.attr('src', shareData.image_url);
+            updateShareLinks(shareData)
             $('#share-image-modal').modal('show');
         }
     }, true, false)
@@ -149,6 +149,7 @@ const containerImagePreview = $('#image-preview')
 const containerDatePicker = $('#datepicker')
 const containerNotFoundMessage = $('#not-found-message')
 const containerPreviewItems = $('.preview-items')
+const containerProgressBar = $('.progress-bar')
 containerActiveImage.on('load', function () {
     updateImageDimensions();
 });
@@ -175,8 +176,8 @@ function updatePaperPageResult(data) {
 }
 
 function updateActivePage(id) {
-    showFullLoader()
     destroyJcrop()
+    showImageLoadingIndicator()
     containerActiveImage.attr('src', '')
     activePageId = parsePageId(id);
     $(".active-page-number").html(activePageId)
@@ -194,9 +195,9 @@ function updateActivePage(id) {
 }
 
 containerActiveImage.on("load", function () {
-    hideFullLoader()
+    completeImageLoadingIndicator()
 }).on("error", function () {
-    hideFullLoader()
+    hideImageLoadingIndicator()
 });
 $(document).on("click", ".page-thumbnail,  .page-numbers", function (event) {
     const pageId = $(this).data('id');
@@ -214,14 +215,18 @@ $(document).on("click", ".go-previous-page", function (event) {
 });
 $(document).on("click", ".download-active-pdf", function (event) {
     const data = activePageData()
-    downloadFromUrl(data.pdf_url)
+    downloadFromUrl(`${baseUrl}download/${data.page_id}/pdf`)
 });
 $(document).on("click", ".download-active-gif", function (event) {
     const data = activePageData()
-    downloadFromUrl(data.gif_url)
+    downloadFromUrl(`${baseUrl}download/${data.page_id}/gif`)
 });
 
 function downloadFromUrl(url) {
+    showFullLoader()
+    setTimeout(function () {
+        hideFullLoader()
+    }, 300)
     const link = document.createElement('a');
     link.href = url;
     link.target = "_blank";
@@ -246,13 +251,52 @@ function buildPageNumbers(page) {
     return `<a class="list-group-item list-group-item-action page-numbers ${isActive(page.id) ? 'active' : ''}"  data-id="${page.id}">${page.id}</a>`
 }
 
-function updateShareLinks(url) {
+function updateShareLinks(shareData) {
+    const  url = shareData.image_url;
     // WhatsApp Share Icon
     $(".whatsapp").attr("href", "whatsapp://send?text=Check%20out%20this%20awesome%20content!%20" + encodeURIComponent(url));
     // Facebook Share Icon
     $(".facebook").attr("href", "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url));
     // Twitter Share Icon
-    $(".twitter").attr("href", "https://twitter.com/intent/tweet?url=" + encodeURIComponent(url) + "&text=Check%20out%20this%20awesome%20content!");
+    $(".twitter").attr("href", "https://twitter.com/intent/tweet?url=" + encodeURIComponent(shareData.share_url) + "&text=Vishwavani ePaper");
     // Download Icon
-    $(".download-button").attr("href", url);
+    $(".download-button").attr("href", `${baseUrl}direct?to=${url}`);
+}
+
+/// -------------------------------
+/// -------------------------------
+function showImageLoadingIndicator() {
+    containerProgressBar.width('100%').attr('aria-valuenow', 0).text('0%');
+    containerProgressBar.removeClass('bg-primary').addClass('bg-success').text('Loading...');
+    simulateLoading()
+    containerProgressBar.fadeIn()
+}
+
+function hideImageLoadingIndicator() {
+    containerProgressBar.fadeOut();
+    containerProgressBar.width('100%').attr('aria-valuenow', 0).text('0%');
+}
+
+function completeImageLoadingIndicator() {
+    percentage = 100;
+    updateProgress(percentage);
+    containerProgressBar.fadeOut();
+}
+
+function updateProgress(percentage) {
+    containerProgressBar.width(percentage + '%').attr('aria-valuenow', percentage).text(percentage + '%');
+}
+
+let percentage = 0;
+
+function simulateLoading() {
+    percentage = 0
+    const interval = setInterval(function () {
+        if (percentage >= 95) {
+            clearInterval(interval);
+        } else {
+            percentage += 2;
+            updateProgress(percentage);
+        }
+    }, 100);
 }

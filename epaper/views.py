@@ -1,8 +1,9 @@
 import json
-
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
+
+from core.models import PaperCut
 from edition.models import Edition
 from epaper.models import Paper, PaperPage
 from django.core.serializers import serialize
@@ -45,3 +46,8 @@ def epaper_home(request):
             data = {'main_editions': main_editions, 'sub_editions': sub_editions}
             return render(request, 'epaper/view_paper.html', data)
     return render(request, 'epaper/view_paper.html', {'main_editions': [], 'sub_editions': []})
+
+
+def share_paper_cut(request, share_id):
+    paper_cut = get_object_or_404(PaperCut, id=share_id)
+    return render(request, 'epaper/share_paper_cut.html', {'share' : paper_cut})

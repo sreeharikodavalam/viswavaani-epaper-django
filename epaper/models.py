@@ -1,5 +1,4 @@
 from django.db import models
-
 from edition.models import Edition
 
 

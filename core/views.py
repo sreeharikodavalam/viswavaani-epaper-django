@@ -1,28 +1,19 @@
-import mimetypes
 import os
 import uuid
-
-from django.http import HttpResponse, FileResponse, JsonResponse
-from django.core.files.base import ContentFile
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound
 from PIL import Image
 import requests
 from io import BytesIO
+
+from django.utils.encoding import smart_str
+
+from core.models import PaperCut
 from epaper.models import PaperPage
 from epaper.utils.R2Boto import R2Boto
 from viswavaani import settings
 
 
-def proxy_file(request):
-    image_url = request.GET.get('to')
-    response = requests.get(image_url)
-    if response.status_code == 200:
-        content_type = response.headers['Content-Type']
-        return HttpResponse(response.content, content_type=content_type)
-    else:
-        return HttpResponse('Failed to fetch image', status=response.status_code)
-
-
-def generate_paper_share_image(request, page_id, x, y, w, h):
+def api_generate_paper_share_image(request, page_id, x, y, w, h):
     try:
         page = PaperPage.objects.filter(pk=page_id).first()
         response = requests.get(page.gif_url)
@@ -32,9 +23,10 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         image = Image.open(BytesIO(response.content))
         cropped_image = image.crop((x, y, x + w, y + h))
 
-        original_content_type = response.headers.get('content-type')
-        file_extension = original_content_type.split('/')[-1]
-
+        original_content_type = 'image/jpeg'
+        file_extension = 'jpeg'
+        print(original_content_type)
+        print(file_extension)
         # Create a blank image with the same width as the cropped image and a height for the header
 
         header_height = 200  # Adjust the height as needed
@@ -60,7 +52,13 @@ def generate_paper_share_image(request, page_id, x, y, w, h):
         # Save the image to a temporary file
         temp_file = BytesIO()
         blank_image.save(temp_file, format=file_extension)
-        return JsonResponse({'result': True, 'message': "OK", "data": upload_s3(temp_file, file_extension)}, safe=False)
+        image_url = upload_s3(temp_file, file_extension)
+        paper_cut = PaperCut.objects.create(image_url=image_url, page_id=page_id)
+        data = {
+            'image_url': image_url,
+            'share_url': paper_cut.share_url()
+        }
+        return JsonResponse({'result': True, 'message': "OK", "data": data}, safe=False)
     except PaperPage.DoesNotExist:
         print("Paper page does not exist.")
         return JsonResponse({'result': False, 'message': "Paper page does not exist."}, safe=False)
@@ -81,3 +79,30 @@ def upload_s3(temp_file, file_extension):
     except Exception as e:
         print("An error occurred while uploading to S3.")
         raise
+
+
+def download_from_bucket(request, page_id, file):
+    page = PaperPage.objects.filter(id=page_id).first()
+    if not page:
+        return HttpResponseNotFound('<h1>Page not found</h1>')
+    url = page.gif_url if file == 'gif' else page.pdf_url
+    extension = ".gif" if file == 'gif' else ".pdf"
+    file_name = f"vishwavani-epaper-{page.paper.date}{extension}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        response = HttpResponse(response.content, content_type=response.headers.get('Content-Type', 'application/octet-stream'))
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
+        return response
+    return HttpResponseNotFound('<h1>404 Page not found</h1>')
+
+
+def proxy_file(request):
+    if file_url := request.GET.get('to'):
+        response = requests.get(file_url)
+        if response.status_code == 200:
+            content_type = response.headers['Content-Type']
+            file_name = os.path.basename(file_url)
+            response = HttpResponse(response.content, content_type=content_type)
+            response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
+            return response
+    return HttpResponseNotFound('<h1>404 Page not found</h1>')
