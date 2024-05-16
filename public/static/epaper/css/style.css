@@ -198,8 +198,9 @@ section {
     position: absolute;
     bottom: 10px;
     right: 10px;
-    z-index: 10;
+    z-index: -999;
     display: none;
+    touch-action: none;
 }
 
 .crop-btn {
@@ -215,4 +216,14 @@ section {
     position: absolute;
     top: 0;
     right: 0
+}
+
+.red-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-weight: bold;
+    border: 2px solid #FFFFFF;
+    z-index: -9999;
+    touch-action: none;
 }

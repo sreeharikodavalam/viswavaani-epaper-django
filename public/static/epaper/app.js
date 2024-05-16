@@ -9,16 +9,34 @@ $(document).ready(function () {
     /** Nice select **/
     $('select').niceSelect();
     /** jCrop**/
-    $(document).on("click", ".crop-button", function (event) {
-        event.preventDefault(); // Prevent default action for the click event
-        cropImage()
-    });
     $(".cropme").click(function () {
         initJcrop();
     });
     $(document).on("click", ".subscribe", function (event) {
         $('#subscribe-modal').modal('show');
     });
+    
+    ///- -----------------------------------
+    ///- -----------------------------------
+    ///- -----------------------------------
+    $(document).on("click", ".crop-button", function (event) {
+        // event.preventDefault();
+        cropImage()
+    });
+    $(document).on("touchstart", ".crop-button", function (event) {
+        // event.preventDefault(); // Prevent default touchstart behavior
+        cropImage();
+    });
+    // Add touch event handlers for document
+    window.addEventListener("touchstart", function (e) {
+        console.log(e)
+    }, {passive: true});
+    $(document).on("click touchstart", ".crop-button", function (event) {
+        console.log(e)
+        console.log('click touchstart')
+        event.preventDefault();
+        cropImage()
+    }, {passive: true});
 });
 
 function destroyJcrop() {
@@ -30,31 +48,21 @@ function destroyJcrop() {
 
 function initJcrop() {
     if (jCropInitButton === false) {
+        jCropInitButton = true;
         containerActiveImage.Jcrop({
                 onSelect: updateCoords
             },
             function () {
                 jcropAPI = this;
                 jcropAPI.setSelect([100, 100, 400, 300]);
+                $('<button class="red-button btn btn-danger btn-sm crop-button" style="z-index: -9999">CROP</button>').appendTo('.jcrop-tracker:first');
+                $('<button class="red-button btn btn-danger btn-sm crop-button">CROP</button>').appendTo('.jcrop-tracker:last');
             });
     }
 }
 
 function updateCoords(c) {
     updateCropPositions(c.x, c.y, c.w, c.h)
-    if (!jCropInitButton) {
-        $('<button class="red-button btn btn-danger btn-sm crop-button" type="button">CROP</button>').appendTo('.jcrop-tracker:first');
-        $('.red-button').css({
-            'position': 'absolute',
-            'bottom': '10px',
-            'right': '10px',
-            'font-weight': 'bold',
-            'border': '2px solid #FFFFFF',
-            'z-index': '9999'
-        });
-        jCropInitButton = true;
-    }
-    console.log('Selected area: x=' + c.x + ', y=' + c.y + ', w=' + c.w + ', h=' + c.h);
 }
 
 function updateCropPositions(x, y, w, h) {
@@ -64,7 +72,6 @@ function updateCropPositions(x, y, w, h) {
         w: Math.round(w * originalImageWidth / containerActiveImage.width()),
         h: Math.round(h * originalImageHeight / containerActiveImage.height())
     };
-    console.log(lastCropPositions)
 }
 
 let originalImageWidth = 0;
@@ -252,11 +259,8 @@ function buildPageNumbers(page) {
 }
 
 function updateShareLinks(shareData) {
-    const  url = shareData.image_url;
-    const  shareUrl = shareData.share_url;
-    
-    window.location.href = `https://wa.me/?text=Vishwavani ePaper : ${encodeURIComponent(shareUrl)}`;
-
+    const url = shareData.image_url;
+    const shareUrl = shareData.share_url;
     // WhatsApp Share Icon
     $(".whatsapp").attr("href", `https://wa.me/?text=Vishwavani ePaper : ${encodeURIComponent(shareUrl)}`);
     // Facebook Share Icon
