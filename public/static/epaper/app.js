@@ -3,7 +3,11 @@ const today = new Date().toISOString().split('T')[0];
 let lastCropPositions = {}
 let jcropAPI;
 let jCropInitButton = false;
+let isMobileDevice = false;
 $(document).ready(function () {
+    if ('ontouchstart' in window) {
+        isMobileDevice = true;
+    }
     /** Date Picker **/
     flatpickr("#datepicker", {defaultDate: today});
     /** Nice select **/
@@ -15,28 +19,14 @@ $(document).ready(function () {
     $(document).on("click", ".subscribe", function (event) {
         $('#subscribe-modal').modal('show');
     });
-    
-    ///- -----------------------------------
-    ///- -----------------------------------
-    ///- -----------------------------------
+    ///- -------------- - ------------------- -
+    ///- -------------- - ------------------- -
     $(document).on("click", ".crop-button", function (event) {
-        // event.preventDefault();
         cropImage()
     });
-    $(document).on("touchstart", ".crop-button", function (event) {
-        // event.preventDefault(); // Prevent default touchstart behavior
-        cropImage();
-    });
-    // Add touch event handlers for document
-    window.addEventListener("touchstart", function (e) {
-        console.log(e)
-    }, {passive: true});
-    $(document).on("click touchstart", ".crop-button", function (event) {
-        console.log(e)
-        console.log('click touchstart')
-        event.preventDefault();
+    $(document).on("click", ".button-mobile-crop", function (event) {
         cropImage()
-    }, {passive: true});
+    });
 });
 
 function destroyJcrop() {
@@ -44,19 +34,35 @@ function destroyJcrop() {
         jCropInitButton = false;
         jcropAPI.destroy()
     }
+    containerMobileCropButton.css("visibility", "hidden");
 }
 
 function initJcrop() {
     if (jCropInitButton === false) {
+        if(isMobileDevice) {
+            containerMobileCropButton.css("visibility", "visible");
+        }
         jCropInitButton = true;
         containerActiveImage.Jcrop({
-                onSelect: updateCoords
+                onSelect: updateCoords,
+                onTouch: function () {
+                    const button = $('.crop-button'); // Assuming the button exists
+                    if (button.length) {
+                        button.trigger('click'); // Simulate click event on button
+                    }
+                }
             },
             function () {
+                $(this).on('click', '.crop-button', function (event) {
+                    event.preventDefault(); // Prevent default click behavior
+                    // Your crop button click logic here
+                    console.log('Crop button clicked on mobile!');
+                });
                 jcropAPI = this;
                 jcropAPI.setSelect([100, 100, 400, 300]);
-                $('<button class="red-button btn btn-danger btn-sm crop-button" style="z-index: -9999">CROP</button>').appendTo('.jcrop-tracker:first');
-                $('<button class="red-button btn btn-danger btn-sm crop-button">CROP</button>').appendTo('.jcrop-tracker:last');
+                if(!isMobileDevice) {
+                    $('<button class="red-button btn btn-danger btn-sm crop-button">CROP</button>').appendTo('.jcrop-tracker:first');
+                }
             });
     }
 }
@@ -92,6 +98,7 @@ function cropImage() {
             containerImagePreview.attr('src', shareData.image_url);
             updateShareLinks(shareData)
             $('#share-image-modal').modal('show');
+            destroyJcrop()
         }
     }, true, false)
 }
@@ -112,20 +119,20 @@ $(document).ready(function () {
                     selectOptionSubEdition.append($('<option>', {value: item.id, text: item.name}));
                 })
                 selectOptionSubEdition.niceSelect('update');
+                selectOptionEdition.niceSelect('update');
                 apiFetchPapers()
             }
         }, false, false)
     });
     selectOptionSubEdition.change(function () {
-        console.log("Sub Editions updated")
         apiFetchPapers()
     });
     containerDatePicker.change(function () {
         apiFetchPapers()
     })
-    selectOptionEdition.niceSelect('update');
-    selectOptionSubEdition.niceSelect('update');
-    apiFetchPapers()
+    setTimeout(function () {
+        apiFetchPapers()
+    }, 500)
 })
 
 function parsePageId(input) {
@@ -157,6 +164,7 @@ const containerDatePicker = $('#datepicker')
 const containerNotFoundMessage = $('#not-found-message')
 const containerPreviewItems = $('.preview-items')
 const containerProgressBar = $('.progress-bar')
+const containerMobileCropButton = $('.button-mobile-crop')
 containerActiveImage.on('load', function () {
     updateImageDimensions();
 });
@@ -261,15 +269,26 @@ function buildPageNumbers(page) {
 function updateShareLinks(shareData) {
     const url = shareData.image_url;
     const shareUrl = shareData.share_url;
+    const title = "Vishwavani ePaper";
+    const description = "Check out the latest edition of Vishwavani ePaper!";
+    const hashtags = "Vishwavani,ePaper,News";
+
     // WhatsApp Share Icon
-    $(".whatsapp").attr("href", `https://wa.me/?text=Vishwavani ePaper : ${encodeURIComponent(shareUrl)}`);
+    $(".whatsapp").attr("href", `https://wa.me/?text=${encodeURIComponent(title)}: ${encodeURIComponent(shareUrl)}`);
+
     // Facebook Share Icon
-    $(".facebook").attr("href", "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url));
+    $(".facebook").attr("href", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(description)}`);
+
     // Twitter Share Icon
-    $(".twitter").attr("href", "https://twitter.com/intent/tweet?url=" + encodeURIComponent(shareData.share_url) + "&text=Vishwavani ePaper");
+    $(".twitter").attr("href", `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}&hashtags=${encodeURIComponent(hashtags)}`);
+
+    // LinkedIn Share Icon
+    $(".linkedin").attr("href", `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(description)}`);
+
     // Download Icon
     $(".download-button").attr("href", `${baseUrl}direct?to=${url}`);
 }
+
 
 /// -------------------------------
 /// -------------------------------

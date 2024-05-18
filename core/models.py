@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.urls import reverse
-
+from urllib.parse import urljoin
 from epaper.models import PaperPage
 from viswavaani.settings import BASE_URL
 
@@ -23,4 +23,5 @@ class PaperCut(models.Model):
         return f"{self.date} - {self.id}"
 
     def share_url(self):
-        return f"{BASE_URL}{reverse('share-paper-cut', args=[str(self.id)])}"
+        sub_url = reverse('share-paper-cut', args=[str(self.id)])
+        return urljoin(BASE_URL, sub_url)

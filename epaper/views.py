@@ -42,7 +42,8 @@ def variants(request):
 
 def epaper_home(request):
     if main_editions := Edition.objects.filter(is_main=True, is_active=True):
-        if sub_editions := Edition.get_sub_editions(main_editions.first().id):
+        sub_edition_id = main_editions[0].id
+        if sub_editions := Edition.get_sub_editions(sub_edition_id):
             data = {'main_editions': main_editions, 'sub_editions': sub_editions}
             return render(request, 'epaper/view_paper.html', data)
     return render(request, 'epaper/view_paper.html', {'main_editions': [], 'sub_editions': []})

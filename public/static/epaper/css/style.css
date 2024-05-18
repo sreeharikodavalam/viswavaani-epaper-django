@@ -174,8 +174,8 @@ a:visited {
     color: #1da1f2; /* Twitter brand color */
 }
 
-#progress-bar {
-    height: 30px;
+.progress-bar {
+    height: 20px;
 }
 
 a {
@@ -224,6 +224,15 @@ section {
     right: 10px;
     font-weight: bold;
     border: 2px solid #FFFFFF;
-    z-index: -9999;
+    z-index: 9999;
     touch-action: none;
+}
+
+.button-mobile-crop {
+    position: fixed;
+    bottom: 10%;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 999;
+    visibility: hidden;
 }
