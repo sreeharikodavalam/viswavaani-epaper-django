@@ -39,7 +39,7 @@ function destroyJcrop() {
 
 function initJcrop() {
     if (jCropInitButton === false) {
-        if(isMobileDevice) {
+        if (isMobileDevice) {
             containerMobileCropButton.css("visibility", "visible");
         }
         jCropInitButton = true;
@@ -60,7 +60,7 @@ function initJcrop() {
                 });
                 jcropAPI = this;
                 jcropAPI.setSelect([100, 100, 400, 300]);
-                if(!isMobileDevice) {
+                if (!isMobileDevice) {
                     $('<button class="red-button btn btn-danger btn-sm crop-button">CROP</button>').appendTo('.jcrop-tracker:first');
                 }
             });
@@ -266,29 +266,51 @@ function buildPageNumbers(page) {
     return `<a class="list-group-item list-group-item-action page-numbers ${isActive(page.id) ? 'active' : ''}"  data-id="${page.id}">${page.id}</a>`
 }
 
+const buttonWhatsapp = $(".whatsapp");
+const buttonFacebook = $(".facebook");
+const buttonTwitter = $(".twitter");
+const buttonCopy = $(".copy-button");
+const buttonDownload = $(".download-button");
+
 function updateShareLinks(shareData) {
     const url = shareData.image_url;
     const shareUrl = shareData.share_url;
+    console.log(shareUrl);
     const title = "Vishwavani ePaper";
     const description = "Check out the latest edition of Vishwavani ePaper!";
     const hashtags = "Vishwavani,ePaper,News";
-
-    // WhatsApp Share Icon
-    $(".whatsapp").attr("href", `https://wa.me/?text=${encodeURIComponent(title)}: ${encodeURIComponent(shareUrl)}`);
-
-    // Facebook Share Icon
-    $(".facebook").attr("href", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(description)}`);
-
-    // Twitter Share Icon
-    $(".twitter").attr("href", `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}&hashtags=${encodeURIComponent(hashtags)}`);
-
-    // LinkedIn Share Icon
-    $(".linkedin").attr("href", `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(description)}`);
-
-    // Download Icon
-    $(".download-button").attr("href", `${baseUrl}direct?to=${url}`);
+    buttonWhatsapp.attr("href", `https://wa.me/?text=${encodeURIComponent(title)}: ${encodeURIComponent(shareUrl)}`);
+    buttonFacebook.attr("href", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(description)}`);
+    buttonTwitter.attr("href", `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}&hashtags=${encodeURIComponent(hashtags)}`);
+    buttonDownload.attr("href", `${baseUrl}direct?to=${url}`);
+    buttonCopy.on('click', function (e) {
+        e.preventDefault();
+        copyToClipboard(shareUrl)
+    })
 }
 
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+            console.log(`Copied to clipboard : ${text}`);
+        }, function (err) {
+            console.error('Could not copy text: ', err);
+        });
+    } else {
+        // Fallback method for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Fallback: Could not copy text: ', err);
+        }
+        document.body.removeChild(textArea);
+    }
+}
 
 /// -------------------------------
 /// -------------------------------
