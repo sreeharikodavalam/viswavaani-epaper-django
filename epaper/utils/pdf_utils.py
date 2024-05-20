@@ -6,6 +6,23 @@ from django.conf import settings
 from epaper.utils.R2Boto import R2Boto
 
 
+def _delete_local_file(file_path):
+    """Delete a file from the local file system if it exists."""
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
+def _cleanup_files(processed_files):
+    """Clean up local files after processing and uploading."""
+    try:
+        for page in processed_files:
+            _delete_local_file(page['pdf_path'])
+            _delete_local_file(page['gif_path'])
+            _delete_local_file(page['thumbnail_path'])
+    except Exception as e:
+        print(f"Error deleting  file: {e}")
+
+
 class PDFProcessor:
     def __init__(self, uploaded_files, upload_date):
         self.uploaded_files = uploaded_files
@@ -14,7 +31,9 @@ class PDFProcessor:
 
     def process_files(self, only_first=False):
         processed_files = self._process_uploaded_files(only_first)
-        return self._generate_file_urls(processed_files)
+        file_urls = self._generate_file_urls(processed_files)
+        _cleanup_files(processed_files)
+        return file_urls
 
     def _process_uploaded_files(self, only_first):
         processed_files = []
@@ -89,6 +108,7 @@ def split_pdf_to_pages(pdf_path, file_uuid, only_first=False):
             # return first page only
             if only_first:
                 break
+    _delete_local_file(pdf_path)
     return individual_pdf_paths
 
 
