@@ -53,7 +53,6 @@ function destroyJcrop() {
 function toggleForMobileCrop() {
     $('#container-page-footer').toggle()
     $('#container-page-header').toggle()
-    $('.preview-items').toggleClass('hidden')
 }
 
 function initJcrop() {
@@ -291,10 +290,11 @@ function updateShareLinks(shareData) {
     const title = "Vishwavani ePaper";
     const description = "Check out the latest edition of Vishwavani ePaper!";
     const hashtags = "Vishwavani,ePaper,News";
+    const text = `${encodeURIComponent(title)}%0A${encodeURIComponent(description)}`;
     inputShareUrl.val(shareUrl)
-    buttonWhatsapp.attr("href", `https://wa.me/?text=${encodeURIComponent(title)}: ${encodeURIComponent(shareUrl)}`);
-    buttonFacebook.attr("href", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(description)}`);
-    buttonTwitter.attr("href", `https://twitter.com/intent/tweet?url=${shareData.image_url}`);
+    buttonWhatsapp.attr("href", `https://wa.me/?text=${text}%0A${encodeURIComponent(shareUrl)}`);
+    buttonFacebook.attr("href", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${text}`);
+    buttonTwitter.attr("href", `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${text}`);
     buttonDownload.attr("href", `${baseUrl}direct?to=${url}`);
     buttonCopy.on('click', function (e) {
         console.log("------------")
