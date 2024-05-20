@@ -14,7 +14,11 @@ $(document).ready(function () {
     $('select').niceSelect();
     /** jCrop**/
     $(".cropme").click(function () {
-        initJcrop();
+        if (jCropInitButton === false) {
+            initJcrop();
+        } else {
+            cropImage()
+        }
     });
     $(document).on("click", ".subscribe", function (event) {
         $('#subscribe-modal').modal('show');
@@ -23,6 +27,12 @@ $(document).ready(function () {
     ///- -------------- - ------------------- -
     $(document).on("click", ".crop-button", function (event) {
         cropImage()
+    });
+    $(document).on("click", "#crop-button-bottom", function (event) {
+        cropImage()
+    });
+    $(document).on("click", ".crop-cancel-button", function (event) {
+        destroyJcrop()
     });
     $(document).on("click", ".button-mobile-crop", function (event) {
         cropImage()
@@ -33,35 +43,35 @@ function destroyJcrop() {
     if (jCropInitButton === true) {
         jCropInitButton = false;
         jcropAPI.destroy()
+        if (isMobileDevice) {
+            containerMobileCropButton.css("visibility", "hidden");
+            toggleForMobileCrop()
+        }
     }
-    containerMobileCropButton.css("visibility", "hidden");
+}
+
+function toggleForMobileCrop() {
+    $('#container-page-footer').toggle()
+    $('#container-page-header').toggle()
+    $('.preview-items').toggleClass('hidden')
 }
 
 function initJcrop() {
     if (jCropInitButton === false) {
         if (isMobileDevice) {
             containerMobileCropButton.css("visibility", "visible");
+            toggleForMobileCrop()
         }
         jCropInitButton = true;
         containerActiveImage.Jcrop({
                 onSelect: updateCoords,
-                onTouch: function () {
-                    const button = $('.crop-button'); // Assuming the button exists
-                    if (button.length) {
-                        button.trigger('click'); // Simulate click event on button
-                    }
-                }
             },
             function () {
-                $(this).on('click', '.crop-button', function (event) {
-                    event.preventDefault(); // Prevent default click behavior
-                    // Your crop button click logic here
-                    console.log('Crop button clicked on mobile!');
-                });
                 jcropAPI = this;
                 jcropAPI.setSelect([100, 100, 400, 300]);
                 if (!isMobileDevice) {
-                    $('<button class="red-button btn btn-danger btn-sm crop-button">CROP</button>').appendTo('.jcrop-tracker:first');
+                    $('<div class="crop-area-container"><a class="crop-cancel-button">&nbsp;Close&nbsp;</a> <button class="red-button btn btn-danger btn-sm crop-button">CROP</button>' +
+                        '</div>').appendTo('.jcrop-tracker:first');
                 }
             });
     }
@@ -78,6 +88,7 @@ function updateCropPositions(x, y, w, h) {
         w: Math.round(w * originalImageWidth / containerActiveImage.width()),
         h: Math.round(h * originalImageHeight / containerActiveImage.height())
     };
+    console.log(lastCropPositions)
 }
 
 let originalImageWidth = 0;
@@ -164,7 +175,7 @@ const containerDatePicker = $('#datepicker')
 const containerNotFoundMessage = $('#not-found-message')
 const containerPreviewItems = $('.preview-items')
 const containerProgressBar = $('.progress-bar')
-const containerMobileCropButton = $('.button-mobile-crop')
+const containerMobileCropButton = $('.fixed-bottom-bar')
 containerActiveImage.on('load', function () {
     updateImageDimensions();
 });
@@ -271,6 +282,7 @@ const buttonFacebook = $(".facebook");
 const buttonTwitter = $(".twitter");
 const buttonCopy = $(".copy-button");
 const buttonDownload = $(".download-button");
+const inputShareUrl = $("#input-share-url");
 
 function updateShareLinks(shareData) {
     const url = shareData.image_url;
@@ -279,39 +291,20 @@ function updateShareLinks(shareData) {
     const title = "Vishwavani ePaper";
     const description = "Check out the latest edition of Vishwavani ePaper!";
     const hashtags = "Vishwavani,ePaper,News";
+    inputShareUrl.val(shareUrl)
     buttonWhatsapp.attr("href", `https://wa.me/?text=${encodeURIComponent(title)}: ${encodeURIComponent(shareUrl)}`);
     buttonFacebook.attr("href", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(description)}`);
-    buttonTwitter.attr("href", `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}&hashtags=${encodeURIComponent(hashtags)}`);
+    buttonTwitter.attr("href", `https://twitter.com/intent/tweet?url=${shareData.image_url}`);
     buttonDownload.attr("href", `${baseUrl}direct?to=${url}`);
     buttonCopy.on('click', function (e) {
-        e.preventDefault();
-        copyToClipboard(shareUrl)
+        console.log("------------")
+        $.niceToast.success(
+            "<strong>Copied to clipboard</strong>"
+        );
     })
 }
 
-function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () {
-            console.log(`Copied to clipboard : ${text}`);
-        }, function (err) {
-            console.error('Could not copy text: ', err);
-        });
-    } else {
-        // Fallback method for older browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            document.execCommand('copy');
-        } catch (err) {
-            console.error('Fallback: Could not copy text: ', err);
-        }
-        document.body.removeChild(textArea);
-    }
-}
-
+new ClipboardJS('.copy-button');
 /// -------------------------------
 /// -------------------------------
 function showImageLoadingIndicator() {
