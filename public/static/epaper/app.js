@@ -298,9 +298,7 @@ function updateShareLinks(shareData) {
     buttonDownload.attr("href", `${baseUrl}direct?to=${url}`);
     buttonCopy.on('click', function (e) {
         console.log("------------")
-        $.niceToast.success(
-            "<strong>Copied to clipboard</strong>"
-        );
+        $.niceToast.success("<strong>Copied to clipboard</strong>");
     })
 }
 
@@ -342,3 +340,40 @@ function simulateLoading() {
         }
     }, 100);
 }
+
+//-------------------------------------------
+//-------------------------------------------
+//-------------------------------------------
+const subscribeModalForm = $("#subscribe-form")
+const subscribeModalLoading = $("#subscribe-form-loading")
+const subscribeModalError = $("#subscribe-form-error")
+const subscribeModalSuccess = $("#subscribe-form-success")
+$(document).ready(function () {
+    $('#subscribe-modal').on('hidden.bs.modal', function (e) {
+        subscribeModalForm.show()
+        subscribeModalForm.trigger('reset')
+        subscribeModalLoading.hide()
+        subscribeModalError.hide()
+        subscribeModalSuccess.hide()
+    });
+    subscribeModalForm.on('submit', function (e) {
+        e.preventDefault()
+        const formData = new FormData(this)
+        $(this).hide()
+        subscribeModalLoading.show()
+        postFormData(urlSubscribe, formData, function (result, response) {
+            subscribeModalLoading.hide()
+            if (result) {
+                if (response.result) {
+                    $.niceToast.success("<strong>Success</strong>: " + response.message);
+                    subscribeModalSuccess.show()
+                } else {
+                    $.niceToast.error("<strong>Error</strong>: " + response.message);
+                    subscribeModalForm.show()
+                }
+            } else {
+                $.niceToast.error("<strong>Error</strong>: Unable to connect with server");
+            }
+        }, false, false)
+    })
+});

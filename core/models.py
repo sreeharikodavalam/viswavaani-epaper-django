@@ -7,7 +7,7 @@ from viswavaani.settings import BASE_URL
 
 
 class PaperCut(models.Model):
-    """News paper page cut"""
+    """ePaper page cut"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     is_main = models.BooleanField(default=False)
     date = models.DateField(unique=False, auto_now_add=True)
@@ -25,3 +25,19 @@ class PaperCut(models.Model):
     def share_url(self):
         sub_url = reverse('share-paper-cut', args=[str(self.id)])
         return urljoin(BASE_URL, sub_url)
+
+
+class Subscriber(models.Model):
+    """ePaper Subscribers"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(default=False)
+    date = models.DateField(unique=False, auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Subscriber'
+        verbose_name_plural = 'Subscribers'
+        db_table = 'paper_subscriber'
+
+    def __str__(self):
+        return self.email

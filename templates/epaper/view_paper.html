@@ -147,16 +147,41 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <div class="text-center"><img src="{% static 'epaper/img/logo.png' %}" style="max-width: 120px;"></div>
+                <div class="text-center"><img src="{% static 'epaper/img/logo.png' %}" style="max-width: 120px;">
+                </div>
                 <p class="mt-2 bold">Subscribe here to Get Our ePaper @ Your Email</p>
-                <form class="mb-3 mt-3">
-                    <label for="exampleFormControlInput1" class="form-label">Enter Your Email address</label>
-                    <input type="email" class="form-control" id="exampleFormControlInput1"
-                           placeholder="name@example.com" required>
-                    <div class="my-3">
-                        <button type="button"
-                                class="btn btn-lg btn-primary btn-block bold">Subscribe
-                        </button>
+                <div class="modal-body text-center" id="subscribe-form-success" style="display: none;">
+                    <i class="fas fa-check-circle fa-4x text-primary"></i>
+                    <p class="mt-2">A verification email has been sent to your address. Please click the link in the email to confirm your subscription and start receiving the Vishwavani daily
+                        ePaper.</p>
+                    <p><b>Please check your spam folder if you don't see the email within a few minutes.</b></p>
+                </div>
+                <div class="modal-body text-center" id="subscribe-form-error" style="display: none;">
+                    <i class="fas fa-exclamation-circle fa-4x text-warning"></i>
+                    <p class="mt-2">This email address is already subscribed to Vishwavani ePaper.</p>
+                </div>
+                <div class="modal-body text-center" id="subscribe-form-loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin fa-3x"></i>
+                    <p class="mt-2">Sending verification email...</p>
+                </div>
+                <form class="mb-3 mt-3" id="subscribe-form">
+                    {% csrf_token %}
+                    <div class="row ml-4 mr-4 text">
+                        <div class="col-12">
+                            <label for="exampleFormControlInput1" class="form-label">Enter Your Name</label>
+                            <input type="text" class="form-control" id="exampleFormControlInput1" name="name"
+                                   placeholder="Your name" required>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <label for="exampleFormControlInput2" class="form-label">Enter Your Email address</label>
+                            <input type="email" class="form-control" id="exampleFormControlInput2" name="email"
+                                   placeholder="Your email address" required>
+                        </div>
+                        <div class="my-3">
+                            <button type="submit"
+                                    class="btn btn-lg btn-primary btn-block bold">Subscribe
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -208,6 +233,7 @@
     const urlApiSubEditions = "{% url 'api-sub-editions'  %}"
     const urlApiFetchPapers = "{% url 'api-find-main-edition-paper-release' %}"
     const urlApiEPapers = "{% url 'api-epaper-home-data' %}"
+    const urlSubscribe = "{% url 'subscribe-epaper' %}"
     const baseUrl = "{{ request.scheme }}://{{ request.get_host }}/"
 </script>
 <!-- Bootstrap Bundle with Popper.js -->

@@ -5,12 +5,17 @@ from PIL import Image
 import requests
 from io import BytesIO
 
+from django.shortcuts import render
 from django.utils.encoding import smart_str
 
 from core.models import PaperCut
 from epaper.models import PaperPage
 from epaper.utils.R2Boto import R2Boto
 from viswavaani import settings
+
+
+def email(request):
+    return render(request, 'email/email_subscription_verification.html')
 
 
 def api_generate_paper_share_image(request, page_id, x, y, w, h):
