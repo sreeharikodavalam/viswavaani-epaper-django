@@ -90,7 +90,7 @@ coverage.xml
 
 # pyenv 
 .python-version 
-
+*/migrations
 # celery 
 celerybeat-schedule.* 
 
