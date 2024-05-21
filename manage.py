@@ -3,12 +3,16 @@
 import os
 import sys
 
+import psycopg2
+
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'viswavaani.settings')
     try:
         from django.core.management import execute_from_command_line
+        psycopg2.connect('postgres://avnadmin:AVNS_cvGTRncFoo9hx-h2cfE@pg-1da7257b-nichedesignz-3afe.h.aivencloud.com:21261/defaultdb?sslmode=require')
+
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "
